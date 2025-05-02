@@ -42,7 +42,6 @@ body{
     font-size: 16px;
 }
 .log-btn-txt{
-    font-size: 20px;
     font-weight: 700;
     background: linear-gradient(to right,rgb(105, 161, 194) 0%,rgb(26, 21, 123) 100%);
 }
@@ -69,7 +68,6 @@ body{
     <!-- MAIN CONTAINER -->
 
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        
     
     <!-- LOGIN CONTAINER -->
 
@@ -104,7 +102,7 @@ body{
                         </div>
                     </div>
                     <div class="input-group mb-3">
-                        <button class="btn btn-lg btn-primary w-100 fs-6 log-btn-txt">LOG IN</button>
+                        <button class="btn btn-lg btn-primary w-100 fs-5 log-btn-txt">LOG IN</button>
                     </div>
                 </div>
             </div>
