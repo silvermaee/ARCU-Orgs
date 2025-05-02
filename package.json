@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/iveeeeej/USG-System#readme",
   "dependencies": {
-    "bootstrap": "^5.3.5"
+    "bootstrap": "^5.3.5",
+    "bootstrap-icons": "^1.11.3"
   }
 }

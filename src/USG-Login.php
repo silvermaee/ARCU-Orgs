@@ -20,7 +20,6 @@
     font-style: normal;
 }
 body{
-    /*background: linear-gradient(135deg, #e0e7ef 0%, #f5f7fa 100%);*/
     background: linear-gradient(135deg, rgba(57, 66, 77, 0.5) 0%, rgba(6, 73, 117, 0.9) 100%), url('../img/USG-BG.png');
     background-size: cover;
     background-repeat: no-repeat;
