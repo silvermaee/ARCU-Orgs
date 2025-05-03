@@ -86,7 +86,7 @@ body{
                 <div class="row align-items-center">
                     <div class="header-text mb-4">
                         <h1 class="log-txt">LOG IN</h1>
-                        <h5 class="welcome-txt">Welcome to University of Student Government</h5>
+                        <h5 class="welcome-txt">Welcome to UNIVERSITY OF STUDENT GOVERNMENT</h5>
                     </div>
                     <div class="input-group mb-3">
                         <input type="text" class="form-control form-control-lg bg-light fs-6" placeholder="Username">
