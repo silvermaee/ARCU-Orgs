@@ -54,13 +54,12 @@ li{
 #sidebar:not(.expand) a.sidebar-link span{
     display: none;
 }
-
 .toggle-btn{
-    width: 60px;
-    height: 50px;
+    width: 50px;
+    height: 40px;
     color: #fff;
     border-radius: 0.425rem;
-    font-size: 30px;
+    font-size: 35px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -81,10 +80,18 @@ li{
         opacity: 1;
     }
 }
+.sidebar-logo{
+    display: flex;
+    align-items: center;
+}    
 .sidebar-logo a{
     color: #fff;
     font-size: 1.5rem;
     font-weight: 600;
+    padding-right: 1.5rem;
+}
+.d-flex{
+    border-bottom: 3px solid rgba(255,255,255,0.6);
 }
 .sidebar-nav{
     padding: 0.7rem 0;
@@ -109,11 +116,32 @@ a.sidebar-link{
 a.sidebar-link:hover{
     background-color: rgba(255, 255, 255, 0.075);
     border-left: 6px solid #f69526;
+    color: #00cdfe;
 }
 .sidebar-item{
     position:relative;
 }
-
+.navbar{
+    background-color: #fff;
+    height: 4.6rem;
+    background: linear-gradient(to right, #211948, #f9a602, #bbc9bd);
+    box-shadow: 0 0 2rem 0 rgba(33, 37, 41, 0.1);
+}
+.navbar h1{
+    color: #fff;
+    font-weight: 600;
+    margin: 0;
+}
+.navbar-expand .navbar-collapse{
+    min-width: 200px;
+}
+.avatar{
+    width: 45px;
+    height: 45px;
+    border: 1px solid black;
+    border-radius: 50%;
+    overflow: hidden;
+}
 
 </style>
 
@@ -125,9 +153,9 @@ a.sidebar-link:hover{
     <div class="wrapper">
         <aside id="sidebar">
 
-            <div class="d-flex justify-content-between align-items-center p-4">
+            <div class="d-flex justify-content-center p-3"> <!-- align-items-center --> 
                 <div class="sidebar-logo">
-                    <a href="#">UNIVERSITY OF STUDENT GOVERNMENT</a>
+                    <a href="#">DASHBOARD</a>
                 </div>
                 <button class="toggle-btn border-0" type="button">
                     <i class="bi bi-list"></i>
@@ -195,6 +223,32 @@ a.sidebar-link:hover{
     <!-- MAIN -->
 
         <div class="main">
+
+    <!-- NAVBAR -->
+
+            <nav class="navbar navbar-expand px-4 py-3">
+
+                <h1>UNIVERSITY OF STUDENT GOVERNMENT</h1>
+                
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown">
+                            <a href="#" data-bs-toggle="dropdown" class="nav-icon pe-md-0">
+                                <img src="../img/X-Profile.png" class="avatar img-fluid" alt="">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end rounded-0 border-0 shadow mt-3">
+                                <a href="#" class="dropdown-item">
+                                    <i class="bi bi-person-badge"></i>
+                                    <span>Profile</span>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main></main>
+
         </div>
 
     </div>
