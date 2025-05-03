@@ -39,8 +39,8 @@ li{
     background-color: #fff;
 }
 #sidebar{
-    width: 90px;
-    min-width: 90px;
+    width: 110px;
+    min-width: 110px;
     transition: all 0.4s ease-in-out;
     background: linear-gradient(135deg, #232526 0%, #211948 100%);
     display: flex;
@@ -54,12 +54,13 @@ li{
 #sidebar:not(.expand) a.sidebar-link span{
     display: none;
 }
+
 .toggle-btn{
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 50px;
     color: #fff;
     border-radius: 0.425rem;
-    font-size: 20px;
+    font-size: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -82,7 +83,7 @@ li{
 }
 .sidebar-logo a{
     color: #fff;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: 600;
 }
 .sidebar-nav{
@@ -91,16 +92,19 @@ li{
     z-index: 10;
 }
 a.sidebar-link{
-    padding: .625rem 1.625rem;
+    padding: .625rem 2rem;
     color: #fff;
     display: block;
     white-space: nowrap;
     font-weight: 700;
     border-left: 3px solid transparent;
 }
+.sidebar-footer{
+    padding-bottom: 2rem;
+}
 .sidebar-link i{
-    font-size: 1.1rem;
-    margin-right: .75rem;
+    font-size: 1.8rem;
+    margin-right: .8rem;
 }
 a.sidebar-link:hover{
     background-color: rgba(255, 255, 255, 0.075);
@@ -126,7 +130,7 @@ a.sidebar-link:hover{
                     <a href="#">UNIVERSITY OF STUDENT GOVERNMENT</a>
                 </div>
                 <button class="toggle-btn border-0" type="button">
-                    <i id="icon" class="bi bi-list"></i>
+                    <i class="bi bi-list"></i>
                 </button>
             </div>
 
@@ -181,7 +185,7 @@ a.sidebar-link:hover{
 
             <div class="sidebar-footer">
                 <a href="#" class="sidebar-link">
-                    <i class="bi bi-box-arrow-left"></i>
+                    <i id="icon" class="bi bi-box-arrow-left"></i>
                     <span>LOG OUT</span>
                 </a>
             </div>
