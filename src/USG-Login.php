@@ -82,7 +82,7 @@ body{
 
     <!-- RIGHT BOX -->
 
-            <div class="col-md-6 rounded-4 right-box" style="background: linear-gradient(135deg, rgba(33, 25, 72, 1) 25%, rgba(249, 166, 2, 1) 60%, rgba(187, 201, 189, 1) 80%);">
+            <div class="col-md-6 rounded-4 right-box" style="background: linear-gradient(140deg, rgba(33, 25, 72, 1) 25%, rgba(249, 166, 2, 1) 60%, rgba(187, 201, 189, 1) 80%);">
                 <div class="row align-items-center">
                     <div class="header-text mb-4">
                         <h1 class="log-txt">LOG IN</h1>
