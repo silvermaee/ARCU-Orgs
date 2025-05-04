@@ -79,11 +79,7 @@ li{
     100%{
         opacity: 1;
     }
-}
-.sidebar-logo{
-    display: flex;
-    align-items: center;
-}    
+}   
 .sidebar-logo a{
     color: #fff;
     font-size: 1.5rem;
@@ -153,7 +149,7 @@ a.sidebar-link:hover{
     <div class="wrapper">
         <aside id="sidebar">
 
-            <div class="d-flex justify-content-center p-3"> <!-- align-items-center --> 
+            <div class="d-flex justify-content-center align-items-center p-3">
                 <div class="sidebar-logo">
                     <a href="#">DASHBOARD</a>
                 </div>
@@ -228,7 +224,9 @@ a.sidebar-link:hover{
 
             <nav class="navbar navbar-expand px-4 py-3">
 
-                <h1>UNIVERSITY OF STUDENT GOVERNMENT</h1>
+                <div class="container-fluid my-3">
+                    <h1>UNIVERSITY OF STUDENT GOVERNMENT</h1>
+                </div>
                 
                 <div class="navbar-collapse collapse">
                     <ul class="navbar-nav ms-auto">
@@ -247,7 +245,11 @@ a.sidebar-link:hover{
                 </div>
             </nav>
 
-            <main></main>
+            <main class="content px-3 py-4">
+
+                
+
+            </main>
 
         </div>
 
