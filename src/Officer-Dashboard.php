@@ -255,7 +255,16 @@ a.sidebar-link:hover{
 
     </div>
 
-    <script src="../src/js-functions/off-dashboard.js"></script>
+    <script>
+
+    const hamburger = document.querySelector(".toggle-btn");
+    const sidebar = document.querySelector("#sidebar"); // Selecting the sidebar element
+
+    hamburger.addEventListener("click", function () {
+    sidebar.classList.toggle("expand");
+    });
+
+    </script>
 
 </body>
 </html>

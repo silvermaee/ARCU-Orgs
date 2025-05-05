@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 05, 2025 at 10:15 AM
+-- Generation Time: May 05, 2025 at 02:55 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,6 +20,18 @@ SET time_zone = "+00:00";
 --
 -- Database: `db_usg`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `acc`
+--
+
+CREATE TABLE `acc` (
+  `acc_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `acc_pass` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -63,17 +75,25 @@ CREATE TABLE `lstnfound` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user`
+-- Table structure for table `user_prof`
 --
 
-CREATE TABLE `user` (
+CREATE TABLE `user_prof` (
   `user_id` int(11) NOT NULL,
-  `user_pass` varchar(50) DEFAULT NULL
+  `user_fullname` varchar(50) DEFAULT NULL,
+  `user_course` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `acc`
+--
+ALTER TABLE `acc`
+  ADD PRIMARY KEY (`acc_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `attendance`
@@ -94,14 +114,20 @@ ALTER TABLE `lstnfound`
   ADD PRIMARY KEY (`lst_id`);
 
 --
--- Indexes for table `user`
+-- Indexes for table `user_prof`
 --
-ALTER TABLE `user`
+ALTER TABLE `user_prof`
   ADD PRIMARY KEY (`user_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `acc`
+--
+ALTER TABLE `acc`
+  MODIFY `acc_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `attendance`
@@ -122,10 +148,14 @@ ALTER TABLE `lstnfound`
   MODIFY `lst_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `user`
+-- Constraints for dumped tables
 --
-ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for table `acc`
+--
+ALTER TABLE `acc`
+  ADD CONSTRAINT `acc_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_prof` (`user_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

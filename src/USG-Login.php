@@ -1,3 +1,47 @@
+<?php
+session_start();
+require_once 'db_connection.php'; // Ensure this function throws exceptions on failure
+
+$login_error = '';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $acc_id = $_POST['acc_id'];
+    $acc_pass = $_POST['acc_pass'];
+
+    try {
+        $con = getDatabaseConnection(); // This function should throw an exception on failure
+
+        $stmt = $con->prepare("SELECT acc_pass FROM acc WHERE acc_id = ?");
+        $stmt->bind_param("i", $acc_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 1) {
+            $row = $result->fetch_assoc();
+
+            if ($row['acc_pass'] === $acc_pass) {
+                $_SESSION['acc_id'] = $acc_id;
+                header("Location: dashboard.php");
+                exit();
+            } else {
+                $login_error = "ERROR: Incorrect Credentials.";
+            }
+        } else {
+            $login_error = "ERROR: Account not Found!";
+        }
+
+        $stmt->close();
+        $con->close();
+    } catch (Exception $e) {
+        // Log the error message to a file
+        error_log("Database error: " . $e->getMessage());
+
+        // Display a generic error message to the user
+        $login_error = "An unexpected error occurred. Please try again later.";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,6 +102,22 @@ body{
         padding: 20px;
     }
 }
+.error-message {
+    min-height: 2em;
+    width: 18rem;
+    color: #fff;
+    visibility: hidden;
+    transition: visibility 0.3s ease;
+}
+
+.error-message.visible {
+    background-color: #DC143C;
+    visibility: visible;
+}
+.error-msg{
+    margin-left: 1rem;
+}
+
 
 </style>
 
@@ -88,21 +148,34 @@ body{
                         <h1 class="log-txt">LOG IN</h1>
                         <h5 class="welcome-txt">Welcome to UNIVERSITY OF STUDENT GOVERNMENT</h5>
                     </div>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control form-control-lg bg-light fs-6" placeholder="Username">
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password">
-                    </div>
-                    <div class="input-group mb-5 d-flex">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="formCheck">
-                            <label for="form-check" class="form-check-label text-secondary"><small>Remember Me</small></label>
+
+                    <form action="USG-Login.php" method="POST">
+
+                        <div class="d-flex align-items-center rounded-2 mb-3 error-message <?php echo !empty($login_error) ? 'visible' : ''; ?>">
+                            <div class="error-msg"><?php echo htmlspecialchars($login_error); ?></div>
                         </div>
-                    </div>
-                    <div class="input-group mb-3">
-                        <button class="btn btn-lg btn-primary w-100 fs-5 log-btn-txt">LOG IN</button>
-                    </div>
+
+                        <div class="input-group mb-3">
+                            <input type="text" name="acc_id" class="form-control form-control-lg bg-light fs-6" placeholder="ID Number">
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <input type="password" name="acc_pass" class="form-control form-control-lg bg-light fs-6" placeholder="Password">
+                        </div>
+
+                        <div class="input-group mb-5 d-flex">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="formCheck">
+                                <label for="form-check" class="form-check-label text-light"><small>Remember Me</small></label>
+                            </div>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <button type="submit" class="btn btn-lg btn-primary w-100 fs-5 log-btn-txt">LOG IN</button>
+                        </div>
+
+                    </form>
+
                 </div>
             </div>
     
