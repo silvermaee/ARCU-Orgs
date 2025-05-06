@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if ($row['acc_pass'] === $acc_pass) {
                 $_SESSION['acc_id'] = $acc_id;
-                header("Location: dashboard.php");
+                header("Location: dashboard_test-2.php");
                 exit();
             } else {
                 $login_error = "ERROR: Incorrect Credentials.";

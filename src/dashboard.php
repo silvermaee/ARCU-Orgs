@@ -24,7 +24,7 @@ try {
 $successMessage = '';
 $errors = [];
 
-// Handle Delete event request
+//Delete Event
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_event'])) {
     $deleteId = (int)($_POST['event_id'] ?? 0);
     if ($deleteId > 0) {
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_event'])) {
     }
 }
 
-// Handle Update event request
+//Update Event
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_event'])) {
     $updateId = (int)($_POST['event_id'] ?? 0);
     $eventname = trim($_POST['eventName'] ?? '');
@@ -527,7 +527,6 @@ if (isset($_GET['edit_att_id'])) {
                     </div>
                 </section>
 
-                <!-- Create Event Section -->
               <!-- Create Event Section -->
 <section id="createEventSection" class="section-container d-none" aria-label="Create Event Section">
     <div class="row justify-content-center">
@@ -554,7 +553,8 @@ if (isset($_GET['edit_att_id'])) {
                             <label for="endDate" class="form-label">End Date*</label>
                             <input type="date" class="form-control" id="endDate" name="endDate" required value="<?= htmlspecialchars($_POST['endDate'] ?? ($editEvent ? date('Y-m-d', strtotime($editEvent['enddate'])) : '')) ?>">
                         </div>
-                        <div class="mb-3">
+
+                        <!-- <div class="mb-3">
                             <label for="eventStatus" class="form-label">Status*</label>
                             <select class="form-select" id="eventStatus" name="eventStatus" required>
                                 <option value="">Select Status</option>
@@ -567,7 +567,8 @@ if (isset($_GET['edit_att_id'])) {
                                 }
                                 ?>
                             </select>
-                        </div>
+                        </div> -->
+
                         <div class="mb-3">
                             <label for="eventDescription" class="form-label">Description</label>
                             <textarea class="form-control" id="eventDescription" name="eventDescription" rows="4"><?= htmlspecialchars($_POST['eventDescription'] ?? $editEvent['description'] ?? '') ?></textarea>
@@ -747,68 +748,68 @@ if (isset($_GET['edit_att_id'])) {
         </div>
     </div>
 
-    <!-- Custom JavaScript -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebarExpandBtn = document.getElementById('sidebarExpandBtn');
-            const sidebar = document.getElementById('sidebar');
-            const content = document.getElementById('content');
+<script>
 
-            const navLinks = document.querySelectorAll('#sidebar .nav-link[data-section]');
-            const sections = document.querySelectorAll('main section.section-container');
+    document.addEventListener('DOMContentLoaded', function () {
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarExpandBtn = document.getElementById('sidebarExpandBtn');
+    const sidebar = document.getElementById('sidebar');
+    const content = document.getElementById('content');
 
-            // Toggle sidebar
-            function toggleSidebar() {
-                sidebar.classList.toggle('collapsed');
-                content.classList.toggle('expanded');
-                sidebarExpandBtn.style.display = sidebar.classList.contains('collapsed') ? 'block' : 'none';
+    const navLinks = document.querySelectorAll('#sidebar .nav-link[data-section]');
+    const sections = document.querySelectorAll('main section.section-container');
+
+    // Toggle sidebar
+    function toggleSidebar() {
+        sidebar.classList.toggle('collapsed');
+        conent.classList.toggle('expanded');
+        sidebarExpandBtn.style.display = sidebar.classList.contains('collapsed') ? 'block' : 'none';
+    }
+
+    // Check window width for initial sidebar state
+    function checkWidth() {
+        if (window.innerWidth < 768) {
+            sidebar.classList.add('collapsed');
+            content.classList.add('expanded');
+            sidebarExpandBtn.style.display = 'block';
+        } else {
+            sidebar.classList.remove('collapsed');
+            content.classList.remove('expanded');
+            sidebarExpandBtn.style.display = 'none';
+        }
+    }
+
+        // Show section by id and update active links
+        function showSection(id) {
+            sections.forEach(section => section.classList.add('d-none'));
+            const target = document.getElementById(id);
+            if (target) {
+                target.classList.remove('d-none');
             }
-
-            // Check window width for initial sidebar state
-            function checkWidth() {
-                if (window.innerWidth < 768) {
-                    sidebar.classList.add('collapsed');
-                    content.classList.add('expanded');
-                    sidebarExpandBtn.style.display = 'block';
-                } else {
-                    sidebar.classList.remove('collapsed');
-                    content.classList.remove('expanded');
-                    sidebarExpandBtn.style.display = 'none';
-                }
-            }
-
-            // Show section by id and update active links
-            function showSection(id) {
-                sections.forEach(section => section.classList.add('d-none'));
-                const target = document.getElementById(id);
-                if (target) {
-                    target.classList.remove('d-none');
-                }
-                navLinks.forEach(link => {
-                    if (link.getAttribute('data-section') === id) {
-                        link.classList.add('active');
-                    } else {
-                        link.classList.remove('active');
-                    }
-                });
-            }
-
-            // Initial check
-            checkWidth();
-
-            // Event listeners
-            sidebarToggle.addEventListener('click', toggleSidebar);
-            sidebarExpandBtn.addEventListener('click', toggleSidebar);
-            window.addEventListener('resize', checkWidth);
-
             navLinks.forEach(link => {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    showSection(this.getAttribute('data-section'));
-                    window.scrollTo({top: 0, behavior: 'smooth'});
-                });
+            if (link.getAttribute('data-section') === id) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+                }
             });
+        }
+
+        // Initial check
+        checkWidth();
+
+        // Event listeners
+        sidebarToggle.addEventListener('click', toggleSidebar);
+        sidebarExpandBtn.addEventListener('click', toggleSidebar);
+        window.addEventListener('resize', checkWidth);
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                showSection(this.getAttribute('data-section'));
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            });
+        });
 
             // Buttons inside event dropdown submenu
             document.querySelectorAll('#eventsSubMenu .nav-link').forEach(link => {
@@ -872,6 +873,7 @@ if (isset($_GET['edit_att_id'])) {
             }
             showInitialSection();
         });
-    </script>
+</script>
+
 </body>
 </html>
