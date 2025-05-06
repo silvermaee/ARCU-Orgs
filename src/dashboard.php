@@ -1,7 +1,7 @@
 <?php
 //Database connection info - adjust as needed
 $host = 'localhost';
-$db   = 'db_usg';
+$db   = 'db_usg_main';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';
@@ -233,9 +233,9 @@ if (isset($_GET['edit_att_id'])) {
     <title>USG-Officer_Dashboard</title>
     <link rel="icon" href="../img/USG-Logo.jpg"/>
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
-    <!-- Bootstrap Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="../node_modules/bootstrap-icons/font/bootstrap-icons.min.css">
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     
 <style>
         body {
@@ -746,9 +746,6 @@ if (isset($_GET['edit_att_id'])) {
             </main>
         </div>
     </div>
-
-    <!-- Bootstrap 5 JS Bundle with Popper -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom JavaScript -->
     <script>
