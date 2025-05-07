@@ -48,8 +48,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>USG-Login</title>
-    <link rel="icon" href="../img/USG-Logo.jpg"/>
+    <title>ARCU-Login</title>
+    <link rel="icon" href="../img/ARCULOGO.png"/>
 
     <link rel="stylesheet" href="main.css">
     <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -64,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     font-style: normal;
 }
 body{
-    background: linear-gradient(135deg, rgba(57, 66, 77, 0.5) 0%, rgba(6, 73, 117, 0.9) 100%), url('../img/USG-BG.png');
+    background: linear-gradient(135deg, rgba(57, 66, 77, 0.5) 0%, rgba(117, 6, 12, 0.9) 100%), url('../img/ARCUBG.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -86,7 +86,7 @@ body{
 }
 .log-btn-txt{
     font-weight: 700;
-    background: linear-gradient(to right,rgb(105, 161, 194) 0%,rgb(26, 21, 123) 100%);
+    background: linear-gradient(to right,rgb(194, 105, 105) 0%,rgb(123, 21, 21) 100%);
 }
 
 @media only screen and (max-width: 768px) {
@@ -136,17 +136,17 @@ body{
 
             <div class="col-md-6 d-flex justify-content-center align-items-center flex-column left-box">
                 <div class="featured-image mb-3 text-center w-100">
-                    <img src="../img/USG-Logo2.png" alt="USG Logo" class="img-fluid" style="max-width: 250px; height: auto;">
+                <img src="../img/ARCULOGO.png" alt="ARCU Logo" class="img-fluid" style="max-width: 250px; height: auto;">
                 </div>
             </div>
 
     <!-- RIGHT BOX -->
 
-            <div class="col-md-6 rounded-4 right-box" style="background: linear-gradient(140deg, rgba(33, 25, 72, 1) 25%, rgba(249, 166, 2, 1) 60%, rgba(187, 201, 189, 1) 80%);">
+    <div class="col-md-6 rounded-4 right-box" style="background: linear-gradient(140deg, rgb(72, 25, 25) 25%, rgba(10, 10, 10, 1) 60%, rgba(187, 201, 189, 1) 80%);">
                 <div class="row align-items-center">
                     <div class="header-text mb-4">
                         <h1 class="log-txt">LOG IN</h1>
-                        <h5 class="welcome-txt">Welcome to UNIVERSITY OF STUDENT GOVERNMENT</h5>
+                        <h5 class="welcome-txt">Welcome to ARTS AND CULTURE</h5>
                     </div>
 
                     <form action="USG-Login.php" method="POST">

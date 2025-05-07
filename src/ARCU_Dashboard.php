@@ -2,7 +2,7 @@
 
 // Database connection info - adjust as needed
 $host    = 'localhost';
-$db      = 'db_usg_main';
+$db      = 'db_arcu';
 $user    = 'root';
 $pass    = '';
 $charset = 'utf8mb4';
@@ -223,7 +223,7 @@ if (isset($_GET['edit_att_id'])) {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>USG-Officer_Dashboard</title>
-        <link rel="icon" href="../img/USG-Logo.jpg" />
+        <link rel="icon" href="../img/ARCULOGO.png" />
 
         <link rel="stylesheet" href="main.css" />
         <link rel="stylesheet" href="../node_modules/bootstrap-icons/font/bootstrap-icons.min.css" />
@@ -327,15 +327,15 @@ if (isset($_GET['edit_att_id'])) {
     </head>
     <body>
 
-        <header class="navbar navbar-expand-lg navbar-dark bg-dark" style="background: linear-gradient(140deg, rgba(33, 25, 72, 1) 25%, rgba(249, 166, 2, 1) 60%, rgba(187, 201, 189, 1) 80%);">
+        <header class="navbar navbar-expand-lg navbar-dark bg-dark" style="background: linear-gradient(140deg, rgb(72, 25, 25) 25%, rgba(10, 10, 10, 1) 60%, rgba(187, 201, 189, 1) 80%);">
             <div class="container-fluid">
                 <button id="sidebarToggle" class="btn btn-dark me-2" aria-label="Toggle Sidebar">
                     <i class="bi bi-list"></i>
                 </button>
 
                 <div class="d-flex align-items-center">
-                    <img src="../img/USG-Logo2.png" alt="Company Logo" height="40" class="me-2" />
-                    <a class="navbar-brand" href="#">UNIVERSITY OF STUDENT GOVERNMENT</a>
+                    <img src="../img/ARCULOGO.png" alt="Company Logo" height="40" class="me-2" />
+                    <a class="navbar-brand" href="#">ARTS AND CULTURE</a>
                 </div>
 
                 <div class="dropdown">
@@ -356,7 +356,7 @@ if (isset($_GET['edit_att_id'])) {
 
         <div class="container-fluid">
             <div class="row">
-                <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar" aria-label="Sidebar navigation" style="background: linear-gradient(135deg, #211948 0%, #232526 100%);">
+                <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar" aria-label="Sidebar navigation" style="background: linear-gradient(135deg, #481919 0%, #232526 100%);">
                     <button id="sidebarExpandBtn" class="sidebar-expand-btn" aria-label="Expand Sidebar">
                         <i class="bi bi-chevron-right"></i>
                     </button>

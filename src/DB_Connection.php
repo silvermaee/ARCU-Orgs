@@ -1,7 +1,7 @@
 <?php
 define("DB_USER", 'root');
 define("DB_PASSWORD", '');
-define("DB_NAME", 'db_usg_main');
+define("DB_NAME", 'db_arcu');
 define("DB_HOST", 'localhost');
 
 // Create a database connection
