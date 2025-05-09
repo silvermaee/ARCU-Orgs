@@ -1,4 +1,11 @@
 <?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['acc_id'])) {
+    header("Location: ARCU-Login.php");
+    exit();
+}
 
 // Database connection info - adjust as needed
 $host    = 'localhost';
@@ -18,7 +25,7 @@ $options = [
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
-    exit('Database connection failed: ' . $e->getMessage());
+    die('Database connection failed. Please make sure the database is set up correctly. Error: ' . $e->getMessage());
 }
 
 $successMessage = '';
@@ -158,25 +165,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_attendance']))
     }
 
     if (empty($errors)) {
-        $stmt = $pdo->prepare('INSERT INTO attendance (name, date, time, event_id) VALUES (?, ?, ?, ?)');
-        $stmt->execute([$name, $date, $time, $event_id]);
-        $successMessage = 'Attendance recorded successfully.';
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?msg=' . urlencode($successMessage) . '#attendanceSection');
-        exit();
+        $stmt = $pdo->prepare('INSERT INTO attendance (student_id, name, attendance_date, time, event_id) VALUES (?, ?, ?, ?, ?)');
+        $stmt->execute([$student_id, $name, $attendance_date, $time, $event_id]);
+        // ...
     }
 }
 
 // Fetch events for display
 try {
-    $stmt   = $pdo->query('SELECT * FROM events ORDER BY startdate DESC');
+    error_log("Attempting to fetch events from database...");
+    // First check if the table exists and get its structure
+    $checkTable = $pdo->query("SHOW COLUMNS FROM events");
+    $columns = $checkTable->fetchAll(PDO::FETCH_COLUMN);
+    error_log("Available columns: " . print_r($columns, true));
+    
+    // Now fetch the events without ordering first to see what we get
+    $stmt = $pdo->query('SELECT * FROM events');
     $events = $stmt->fetchAll();
+    error_log("Number of events fetched: " . count($events));
+    if (empty($events)) {
+        error_log("No events found in the database");
+    } else {
+        error_log("Events found: " . print_r($events, true));
+    }
 } catch (\PDOException $e) {
+    error_log("Error fetching events: " . $e->getMessage());
     exit('Error fetching events: ' . htmlspecialchars($e->getMessage()));
 }
 
 // Fetch attendance for display with event names using JOIN
 try {
-    $stmt        = $pdo->query('SELECT a.*, e.eventname FROM attendance a JOIN events e ON a.event_id = e.id ORDER BY a.date DESC, a.time DESC');
+    $stmt        = $pdo->query('SELECT a.*, e.eventname FROM attendance a JOIN events e ON a.event_id = e.id ORDER BY a.attendance_date DESC, a.time DESC');
     $attendances = $stmt->fetchAll();
 } catch (\PDOException $e) {
     exit('Error fetching attendance: ' . htmlspecialchars($e->getMessage()));
@@ -400,6 +419,13 @@ if (isset($_GET['edit_att_id'])) {
                                 <a class="nav-link active" href="#" data-section="attendanceSection" id="navAttendance">
                                     <i class="bi bi-people"></i>
                                     Attendance
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-section="joinClubSection" id="navJoinClub">
+                                    <i class="bi bi-person-plus"></i>
+                                    Join Club
                                 </a>
                             </li>
 
@@ -640,6 +666,57 @@ if (isset($_GET['edit_att_id'])) {
                         </div>
                     </section>
 
+                    <section id="joinClubSection" class="section-container d-none" aria-label="Join Club Section">
+                        <div class="row justify-content-center">
+                            <div class="col-12">
+                                <div class="card mt-4 mb-4">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h5 class="card-title mb-0">Join ARCU Club</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="joinClubForm" method="post" novalidate>
+                                            <div class="mb-3">
+                                                <label for="studentName" class="form-label">Full Name*</label>
+                                                <input type="text" class="form-control" id="studentName" name="studentName" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="studentId" class="form-label">Student ID*</label>
+                                                <input type="text" class="form-control" id="studentId" name="studentId" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">Email Address*</label>
+                                                <input type="email" class="form-control" id="email" name="email" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="phone" class="form-label">Phone Number</label>
+                                                <input type="tel" class="form-control" id="phone" name="phone">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="interests" class="form-label">Areas of Interest*</label>
+                                                <select class="form-select" id="interests" name="interests" multiple required>
+                                                    <option value="visual_arts">Visual Arts</option>
+                                                    <option value="performing_arts">Performing Arts</option>
+                                                    <option value="music">Music</option>
+                                                    <option value="dance">Dance</option>
+                                                    <option value="literature">Literature</option>
+                                                    <option value="cultural_events">Cultural Events</option>
+                                                </select>
+                                                <div class="form-text">Hold Ctrl/Cmd to select multiple options</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="whyJoin" class="form-label">Why do you want to join?*</label>
+                                                <textarea class="form-control" id="whyJoin" name="whyJoin" rows="3" required></textarea>
+                                            </div>
+                                            <div class="text-end">
+                                                <button type="submit" class="btn btn-primary">Submit Application</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                     <section id="attendanceSection" class="section-container" aria-label="Attendance Section">
                         <div class="row justify-content-center">
                             <div class="col-12">
@@ -726,7 +803,7 @@ if (isset($_GET['edit_att_id'])) {
                                                                     <?= htmlspecialchars($attendance['name']) ?>
                                                                 </td>
                                                                 <td>
-                                                                    <?= htmlspecialchars($attendance['date']) ?>
+                                                                    <?= htmlspecialchars($attendance['attendance_date']) ?>
                                                                 </td>
                                                                 <td>
                                                                     <?= htmlspecialchars(date('H:i', strtotime($attendance['time']))) ?>

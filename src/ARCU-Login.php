@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db_connection.php'; // Ensure this function throws exceptions on failure
+require_once 'DB_Connection.php'; // Use the correct filename and case
 
 $login_error = '';
 
@@ -9,19 +9,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $acc_pass = $_POST['acc_pass'];
 
     try {
-        $con = getDatabaseConnection(); // This function should throw an exception on failure
+        // Use $pdo from DB_Connection.php
+        $stmt = $pdo->prepare("SELECT acc_pass, role FROM acc WHERE acc_id = ?");
+        $stmt->execute([$acc_id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $stmt = $con->prepare("SELECT acc_pass FROM acc WHERE acc_id = ?");
-        $stmt->bind_param("i", $acc_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows === 1) {
-            $row = $result->fetch_assoc();
-
+        if ($row) {
             if ($row['acc_pass'] === $acc_pass) {
                 $_SESSION['acc_id'] = $acc_id;
-                header("Location: dashboard_test-2.php");
+                $_SESSION['role'] = $row['role'];
+
+                if ($row['role'] === 'admin') {
+                    header("Location: ARCU-Dashboard.php");
+                } else {
+                    header("Location: ARCU-Student-Dashboard.php");
+                }
                 exit();
             } else {
                 $login_error = "ERROR: Incorrect Credentials.";
@@ -29,14 +31,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             $login_error = "ERROR: Account not Found!";
         }
-
-        $stmt->close();
-        $con->close();
     } catch (Exception $e) {
-        // Log the error message to a file
         error_log("Database error: " . $e->getMessage());
-
-        // Display a generic error message to the user
         $login_error = "An unexpected error occurred. Please try again later.";
     }
 }
@@ -50,7 +46,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCU-Login</title>
     <link rel="icon" href="../img/ARCULOGO.png"/>
-
     <link rel="stylesheet" href="main.css">
     <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -84,9 +79,33 @@ body{
 ::placeholder{
     font-size: 16px;
 }
-.log-btn-txt{
+.log-btn-txt {
     font-weight: 700;
-    background: linear-gradient(to right,rgb(194, 105, 105) 0%,rgb(123, 21, 21) 100%);
+    background: linear-gradient(to right, rgb(194, 105, 105) 0%, rgb(123, 21, 21) 100%);
+    border: none;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+.log-btn-txt:hover {
+    background: linear-gradient(to right, rgb(214, 125, 125), rgb(153, 31, 31));
+    transform: scale(1.02);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+.log-btn-txt:active {
+    transform: scale(0.98);
+}
+input[type="text"]:hover,
+input[type="password"]:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.01);
+}
+input[type="text"],
+input[type="password"] {
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.left-box img:hover {
+    transform: scale(1.05) rotate(-2deg);
+    transition: transform 0.3s ease;
 }
 
 @media only screen and (max-width: 768px) {
@@ -109,7 +128,6 @@ body{
     visibility: hidden;
     transition: visibility 0.3s ease;
 }
-
 .error-message.visible {
     background-color: #DC143C;
     visibility: visible;
@@ -117,7 +135,6 @@ body{
 .error-msg{
     margin-left: 1rem;
 }
-
 
 </style>
 
@@ -128,28 +145,28 @@ body{
 
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
     
-    <!-- LOGIN CONTAINER -->
+        <!-- LOGIN CONTAINER -->
 
         <div class="row border rounded-5 p-3 bg-white shadow box-area">
 
-    <!-- LEFT BOX -->
+            <!-- LEFT BOX -->
 
             <div class="col-md-6 d-flex justify-content-center align-items-center flex-column left-box">
                 <div class="featured-image mb-3 text-center w-100">
-                <img src="../img/ARCULOGO.png" alt="ARCU Logo" class="img-fluid" style="max-width: 250px; height: auto;">
+                    <img src="../img/ARCULOGO.png" alt="ARCU Logo" class="img-fluid" style="max-width: 250px; height: auto;">
                 </div>
             </div>
 
-    <!-- RIGHT BOX -->
+            <!-- RIGHT BOX -->
 
-    <div class="col-md-6 rounded-4 right-box" style="background: linear-gradient(140deg, rgb(72, 25, 25) 25%, rgba(10, 10, 10, 1) 60%, rgba(187, 201, 189, 1) 80%);">
+            <div class="col-md-6 rounded-4 right-box" style="background: linear-gradient(140deg, rgb(72, 25, 25) 25%, rgba(10, 10, 10, 1) 60%, rgba(187, 201, 189, 1) 80%);">
                 <div class="row align-items-center">
                     <div class="header-text mb-4">
                         <h1 class="log-txt">LOG IN</h1>
                         <h5 class="welcome-txt">Welcome to ARTS AND CULTURE</h5>
                     </div>
 
-                    <form action="USG-Login.php" method="POST">
+                    <form action="ARCU-Login.php" method="POST">
 
                         <div class="d-flex align-items-center rounded-2 mb-3 error-message <?php echo !empty($login_error) ? 'visible' : ''; ?>">
                             <div class="error-msg"><?php echo htmlspecialchars($login_error); ?></div>
@@ -178,7 +195,7 @@ body{
 
                 </div>
             </div>
-    
+
         </div>
     </div>
 

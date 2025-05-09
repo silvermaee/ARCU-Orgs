@@ -1,18 +1,19 @@
 <?php
-define("DB_USER", 'root');
-define("DB_PASSWORD", '');
-define("DB_NAME", 'db_arcu');
-define("DB_HOST", 'localhost');
+$host    = 'localhost';
+$db      = 'db_arcu';
+$user    = 'root';
+$pass    = '';
+$charset = 'utf8mb4';
 
-// Create a database connection
-function getDatabaseConnection() {
-    $con = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+$dsn     = "mysql:host=$host;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+];
 
-    //Try-catch if error in LOGIN
-    if ($con->connect_error) {
-        error_log("Connection failed: " . $con->connect_error);
-        die("Unable to connect to the database. Please try again later.");
-    }
-    return $con;
+try {
+    $pdo = new PDO($dsn, $user, $pass, $options);
+} catch (\PDOException $e) {
+    die('Database connection failed: ' . $e->getMessage());
 }
 ?>
