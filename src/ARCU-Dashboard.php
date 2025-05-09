@@ -433,20 +433,6 @@ if (isset($_GET['edit_att_id'])) {
 
                             <li class="nav-item">
                                 <a class="nav-link" href="#">
-                                    <i class="bi bi-cash-coin"></i>
-                                    Payments
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <i class="bi bi-question-diamond"></i>
-                                    Lost and Found
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
                                     <i class="bi bi-chat-left-text me-2"></i>
                                     Feedback
                                 </a>
@@ -668,56 +654,7 @@ if (isset($_GET['edit_att_id'])) {
                         </div>
                     </section>
 
-                    <section id="joinClubSection" class="section-container d-none" aria-label="Join Club Section">
-                        <div class="row justify-content-center">
-                            <div class="col-12">
-                                <div class="card mt-4 mb-4">
-                                    <div class="card-header bg-secondary text-white">
-                                        <h5 class="card-title mb-0">Join ARCU Club</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <form id="joinClubForm" method="post" novalidate>
-                                            <div class="mb-3">
-                                                <label for="studentName" class="form-label">Full Name*</label>
-                                                <input type="text" class="form-control" id="studentName" name="studentName" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="studentId" class="form-label">Student ID*</label>
-                                                <input type="text" class="form-control" id="studentId" name="studentId" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="email" class="form-label">Email Address*</label>
-                                                <input type="email" class="form-control" id="email" name="email" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="phone" class="form-label">Phone Number</label>
-                                                <input type="tel" class="form-control" id="phone" name="phone">
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="interests" class="form-label">Areas of Interest*</label>
-                                                <select class="form-select" id="interests" name="interests" multiple required>
-                                                    <option value="visual_arts">Visual Arts</option>
-                                                    <option value="performing_arts">Performing Arts</option>
-                                                    <option value="music">Music</option>
-                                                    <option value="dance">Dance</option>
-                                                    <option value="literature">Literature</option>
-                                                    <option value="cultural_events">Cultural Events</option>
-                                                </select>
-                                                <div class="form-text">Hold Ctrl/Cmd to select multiple options</div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="whyJoin" class="form-label">Why do you want to join?*</label>
-                                                <textarea class="form-control" id="whyJoin" name="whyJoin" rows="3" required></textarea>
-                                            </div>
-                                            <div class="text-end">
-                                                <button type="submit" class="btn btn-primary">Submit Application</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    
 
                     <section id="attendanceSection" class="section-container" aria-label="Attendance Section">
                         <div class="row justify-content-center">
