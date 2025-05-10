@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start();
 
 // Check if user is logged in
@@ -171,6 +175,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_attendance']))
     }
 }
 
+// Handle Remove member request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_member'])) {
+    $memberId = (int) ($_POST['member_id'] ?? 0);
+    if ($memberId > 0) {
+        $stmt = $pdo->prepare('DELETE FROM club_members WHERE id = ?');
+        $stmt->execute([$memberId]);
+        $successMessage = 'Member removed successfully.';
+        header('Location: ' . $_SERVER['PHP_SELF'] . '#joinClubSection');
+        exit();
+    }
+}
+
+// Handle Update member request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_member'])) {
+    $updateId = (int) ($_POST['member_id'] ?? 0);
+    $status = $_POST['status'] ?? '';
+
+    if ($updateId > 0 && in_array($status, ['pending', 'active'])) {
+        $stmt = $pdo->prepare('UPDATE club_members SET status = ? WHERE id = ?');
+        $stmt->execute([$status, $updateId]);
+        $successMessage = 'Member status updated successfully.';
+        header('Location: ' . $_SERVER['PHP_SELF'] . '#joinClubSection');
+        exit();
+    }
+}
+
+// Check edit member request
+$editMember = null;
+if (isset($_GET['edit_member_id'])) {
+    $editMemberId = (int) $_GET['edit_member_id'];
+    $stmt = $pdo->prepare('SELECT * FROM club_members WHERE id = ?');
+    $stmt->execute([$editMemberId]);
+    $editMember = $stmt->fetch();
+}
+
 // Fetch events for display
 try {
     error_log("Attempting to fetch events from database...");
@@ -233,6 +272,185 @@ if (isset($_GET['edit_att_id'])) {
     $stmt      = $pdo->prepare('SELECT * FROM attendance WHERE id = ?');
     $stmt->execute([$editAttId]);
     $editAttendance = $stmt->fetch();
+}
+
+// Fetch clubs for dropdown and view
+try {
+    $stmt = $pdo->query('SELECT * FROM clubs ORDER BY club_name ASC');
+    $clubs = $stmt->fetchAll();
+} catch (\PDOException $e) {
+    error_log("Error fetching clubs: " . $e->getMessage());
+    $clubs = [];
+}
+
+// Fetch club members
+try {
+    $stmt = $pdo->query('SELECT cm.*, c.club_name 
+                         FROM club_members cm 
+                         JOIN clubs c ON cm.club_id = c.club_id 
+                         ORDER BY cm.join_date DESC');
+    $clubMembers = $stmt->fetchAll();
+} catch (\PDOException $e) {
+    error_log("Error fetching club members: " . $e->getMessage());
+    $clubMembers = [];
+}
+
+// Handle report generation
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_report'])) {
+    $reportType = $_POST['report_type'] ?? '';
+    $dateFrom = $_POST['date_from'] ?? '';
+    $dateTo = $_POST['date_to'] ?? '';
+    $format = $_POST['format'] ?? 'pdf';
+    
+    // Validate dates
+    if (empty($dateFrom) || empty($dateTo)) {
+        $error = "Please select both date range fields.";
+    } else {
+        try {
+            switch ($reportType) {
+                case 'events':
+                    $status = $_POST['event_status'] ?? 'all';
+                    $query = "SELECT * FROM events WHERE event_date BETWEEN ? AND ?";
+                    if ($status !== 'all') {
+                        $query .= " AND status = ?";
+                    }
+                    $query .= " ORDER BY event_date DESC";
+                    
+                    $stmt = $pdo->prepare($query);
+                    if ($status !== 'all') {
+                        $stmt->bind_param("sss", $dateFrom, $dateTo, $status);
+                    } else {
+                        $stmt->bind_param("ss", $dateFrom, $dateTo);
+                    }
+                    break;
+
+                case 'attendance':
+                    $status = $_POST['attendance_status'] ?? 'all';
+                    $eventId = $_POST['event_filter'] ?? 'all';
+                    
+                    $query = "SELECT a.*, e.event_name, e.event_date 
+                             FROM attendance a 
+                             JOIN events e ON a.event_id = e.id 
+                             WHERE e.event_date BETWEEN ? AND ?";
+                    
+                    if ($status !== 'all') {
+                        $query .= " AND a.status = ?";
+                    }
+                    if ($eventId !== 'all') {
+                        $query .= " AND a.event_id = ?";
+                    }
+                    $query .= " ORDER BY e.event_date DESC";
+                    
+                    $stmt = $pdo->prepare($query);
+                    if ($status !== 'all' && $eventId !== 'all') {
+                        $stmt->bind_param("sssi", $dateFrom, $dateTo, $status, $eventId);
+                    } elseif ($status !== 'all') {
+                        $stmt->bind_param("sss", $dateFrom, $dateTo, $status);
+                    } elseif ($eventId !== 'all') {
+                        $stmt->bind_param("ssi", $dateFrom, $dateTo, $eventId);
+                    } else {
+                        $stmt->bind_param("ss", $dateFrom, $dateTo);
+                    }
+                    break;
+
+                case 'clubs':
+                    $status = $_POST['member_status'] ?? 'all';
+                    $interest = $_POST['interest_filter'] ?? 'all';
+                    
+                    $query = "SELECT * FROM club_members WHERE join_date BETWEEN ? AND ?";
+                    if ($status !== 'all') {
+                        $query .= " AND status = ?";
+                    }
+                    if ($interest !== 'all') {
+                        $query .= " AND interests LIKE ?";
+                    }
+                    $query .= " ORDER BY join_date DESC";
+                    
+                    $stmt = $pdo->prepare($query);
+                    if ($status !== 'all' && $interest !== 'all') {
+                        $interestParam = "%$interest%";
+                        $stmt->bind_param("ssss", $dateFrom, $dateTo, $status, $interestParam);
+                    } elseif ($status !== 'all') {
+                        $stmt->bind_param("sss", $dateFrom, $dateTo, $status);
+                    } elseif ($interest !== 'all') {
+                        $interestParam = "%$interest%";
+                        $stmt->bind_param("sss", $dateFrom, $dateTo, $interestParam);
+                    } else {
+                        $stmt->bind_param("ss", $dateFrom, $dateTo);
+                    }
+                    break;
+
+                default:
+                    throw new Exception("Invalid report type");
+            }
+
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $data = $result->fetch_all(MYSQLI_ASSOC);
+
+            // Generate report based on format
+            switch ($format) {
+                case 'pdf':
+                     // Make sure you have TCPDF installed
+                    $pdf = new TCPDF();
+                    $pdf->AddPage();
+                    $pdf->SetFont('helvetica', '', 12);
+                    
+                    // Add report header
+                    $pdf->Cell(0, 10, ucfirst($reportType) . ' Report', 0, 1, 'C');
+                    $pdf->Cell(0, 10, "Period: $dateFrom to $dateTo", 0, 1, 'C');
+                    $pdf->Ln(10);
+                    
+                    // Add data
+                    foreach ($data as $row) {
+                        foreach ($row as $key => $value) {
+                            $pdf->Cell(0, 10, ucfirst($key) . ': ' . $value, 0, 1);
+                        }
+                        $pdf->Ln(5);
+                    }
+                    
+                    $pdf->Output('report.pdf', 'D');
+                    break;
+
+                case 'excel':
+                    header('Content-Type: application/vnd.ms-excel');
+                    header('Content-Disposition: attachment;filename="report.xls"');
+                    header('Cache-Control: max-age=0');
+                    
+                    echo "Report Type: " . ucfirst($reportType) . "\n";
+                    echo "Period: $dateFrom to $dateTo\n\n";
+                    
+                    if (!empty($data)) {
+                        echo implode("\t", array_keys($data[0])) . "\n";
+                        foreach ($data as $row) {
+                            echo implode("\t", $row) . "\n";
+                        }
+                    }
+                    break;
+
+                case 'csv':
+                    header('Content-Type: text/csv');
+                    header('Content-Disposition: attachment;filename="report.csv"');
+                    
+                    $output = fopen('php://output', 'w');
+                    fputcsv($output, ['Report Type', ucfirst($reportType)]);
+                    fputcsv($output, ['Period', "$dateFrom to $dateTo"]);
+                    fputcsv($output, []);
+                    
+                    if (!empty($data)) {
+                        fputcsv($output, array_keys($data[0]));
+                        foreach ($data as $row) {
+                            fputcsv($output, $row);
+                        }
+                    }
+                    fclose($output);
+                    break;
+            }
+            exit;
+        } catch (Exception $e) {
+            $error = "Error generating report: " . $e->getMessage();
+        }
+    }
 }
 ?>
 
@@ -423,44 +641,30 @@ if (isset($_GET['edit_att_id'])) {
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="#" data-section="joinClubSection" id="navJoinClub">
+                                <a class="nav-link" href="#" data-section="gallerySection" id="navGallery">
+                                    <i class="bi bi-images"></i>
+                                    Gallery
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-section="viewClubsSection">
                                     <i class="bi bi-person-plus"></i>
-                                    Join Club
+                                    Clubs
                                 </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <i class="bi bi-cash-coin"></i>
-                                    Payments
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <i class="bi bi-question-diamond"></i>
-                                    Lost and Found
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <i class="bi bi-chat-left-text me-2"></i>
-                                    Feedback
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
+                                <a class="nav-link" href="#" data-section="generateReportSection" id="navGenerateReport">
                                     <i class="bi bi-file-earmark-bar-graph me-2"></i>
                                     Generate Report
                                 </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <i class="bi bi-people me-2"></i>
-                                    Users
+                                <a class="nav-link" href="#" data-section="feedbackSection" id="navFeedback">
+                                    <i class="bi bi-chat-left-text me-2"></i>
+                                    Feedback
                                 </a>
                             </li>
                         </ul>
@@ -666,34 +870,43 @@ if (isset($_GET['edit_att_id'])) {
                         </div>
                     </section>
 
-                    <section id="joinClubSection" class="section-container d-none" aria-label="Join Club Section">
+                    <section id="joinClubSection" class="section-container d-none">
                         <div class="row justify-content-center">
                             <div class="col-12">
                                 <div class="card mt-4 mb-4">
                                     <div class="card-header bg-secondary text-white">
-                                        <h5 class="card-title mb-0">Join ARCU Club</h5>
+                                        <h5 class="card-title mb-0">Join a Club</h5>
                                     </div>
                                     <div class="card-body">
-                                        <form id="joinClubForm" method="post" novalidate>
+                                        <form id="joinClubForm" method="post">
+                                            <div class="mb-3">
+                                                <label for="club_id" class="form-label">Select Club*</label>
+                                                <select class="form-select" id="club_id" name="club_id" required>
+                                                    <option value="">Choose a club...</option>
+                                                    <?php foreach ($clubs as $club): ?>
+                                                        <option value="<?= $club['club_id'] ?>"><?= htmlspecialchars($club['club_name']) ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
                                             <div class="mb-3">
                                                 <label for="studentName" class="form-label">Full Name*</label>
-                                                <input type="text" class="form-control" id="studentName" name="studentName" required>
+                                                <input type="text" class="form-control" id="studentName" name="studentName" required />
                                             </div>
                                             <div class="mb-3">
                                                 <label for="studentId" class="form-label">Student ID*</label>
-                                                <input type="text" class="form-control" id="studentId" name="studentId" required>
+                                                <input type="text" class="form-control" id="studentId" name="studentId" required />
                                             </div>
                                             <div class="mb-3">
                                                 <label for="email" class="form-label">Email Address*</label>
-                                                <input type="email" class="form-control" id="email" name="email" required>
+                                                <input type="email" class="form-control" id="email" name="email" required />
                                             </div>
                                             <div class="mb-3">
                                                 <label for="phone" class="form-label">Phone Number</label>
-                                                <input type="tel" class="form-control" id="phone" name="phone">
+                                                <input type="tel" class="form-control" id="phone" name="phone" />
                                             </div>
                                             <div class="mb-3">
                                                 <label for="interests" class="form-label">Areas of Interest*</label>
-                                                <select class="form-select" id="interests" name="interests" multiple required>
+                                                <select class="form-select" id="interests" name="interests[]" multiple required>
                                                     <option value="visual_arts">Visual Arts</option>
                                                     <option value="performing_arts">Performing Arts</option>
                                                     <option value="music">Music</option>
@@ -708,7 +921,8 @@ if (isset($_GET['edit_att_id'])) {
                                                 <textarea class="form-control" id="whyJoin" name="whyJoin" rows="3" required></textarea>
                                             </div>
                                             <div class="text-end">
-                                                <button type="submit" class="btn btn-primary">Submit Application</button>
+                                                <button type="reset" class="btn btn-danger me-2">Cancel</button>
+                                                <button type="submit" name="join_club" class="btn btn-primary">Submit Application</button>
                                             </div>
                                         </form>
                                     </div>
@@ -845,6 +1059,252 @@ if (isset($_GET['edit_att_id'])) {
                             </div>
                         </div>
                     </section>
+
+                    <section id="viewClubsSection" class="section-container d-none">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card mt-4 mb-4">
+                                    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">All Clubs and Members</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover" id="clubsTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">#</th>
+                                                        <th scope="col">Club Name</th>
+                                                        <th scope="col">Description</th>
+                                                        <th scope="col">Members</th>
+                                                        <th scope="col" style="min-width: 110px">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php if (!empty($clubs)): ?>
+                                                        <?php foreach ($clubs as $index => $club): ?>
+                                                            <tr>
+                                                                <th scope="row"><?= $index + 1 ?></th>
+                                                                <td><?= htmlspecialchars($club['club_name']) ?></td>
+                                                                <td><?= htmlspecialchars($club['description']) ?></td>
+                                                                <td>
+                                                                    <span class="badge bg-primary"><?= $club['member_count'] ?? 0 ?> members</span>
+                                                                </td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                                            data-bs-toggle="modal" 
+                                                                            data-bs-target="#viewMembersModal<?= $club['club_id'] ?>">
+                                                                        <i class="bi bi-people"></i> View Members
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+
+                                                            <!-- View Members Modal -->
+                                                            <div class="modal fade" id="viewMembersModal<?= $club['club_id'] ?>" tabindex="-1" aria-hidden="true">
+                                                                <div class="modal-dialog modal-lg">
+                                                                    <div class="modal-content">
+                                                                        <div class="modal-header">
+                                                                            <h5 class="modal-title"><?= htmlspecialchars($club['club_name']) ?> - Members</h5>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            <div class="table-responsive">
+                                                                                <table class="table table-striped">
+                                                                                    <thead>
+                                                                                        <tr>
+                                                                                            <th>Name</th>
+                                                                                            <th>Student ID</th>
+                                                                                            <th>Email</th>
+                                                                                            <th>Join Date</th>
+                                                                                            <th>Status</th>
+                                                                                            <th>Actions</th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                        <?php
+                                                                                        $stmt = $pdo->prepare('SELECT * FROM club_members WHERE club_id = ? ORDER BY join_date DESC');
+                                                                                        $stmt->execute([$club['club_id']]);
+                                                                                        $members = $stmt->fetchAll();
+                                                                                        
+                                                                                        if (!empty($members)):
+                                                                                            foreach ($members as $member):
+                                                                                        ?>
+                                                                                            <tr>
+                                                                                                <td><?= htmlspecialchars($member['student_name']) ?></td>
+                                                                                                <td><?= htmlspecialchars($member['student_id']) ?></td>
+                                                                                                <td><?= htmlspecialchars($member['email']) ?></td>
+                                                                                                <td><?= date('M d, Y', strtotime($member['join_date'])) ?></td>
+                                                                                                <td>
+                                                                                                    <span class="badge bg-<?= $member['status'] === 'active' ? 'success' : 'warning' ?>">
+                                                                                                        <?= ucfirst($member['status']) ?>
+                                                                                                    </span>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <form method="post" class="d-inline">
+                                                                                                        <input type="hidden" name="member_id" value="<?= $member['id'] ?>" />
+                                                                                                        <input type="hidden" name="status" value="<?= $member['status'] === 'active' ? 'pending' : 'active' ?>" />
+                                                                                                        <button type="submit" name="update_member" class="btn btn-sm btn-outline-primary" title="<?= $member['status'] === 'active' ? 'Set to Pending' : 'Set to Active' ?>">
+                                                                                                            <i class="bi bi-<?= $member['status'] === 'active' ? 'hourglass' : 'check-circle' ?>"></i>
+                                                                                                        </button>
+                                                                                                    </form>
+                                                                                                    <form method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this member?');">
+                                                                                                        <input type="hidden" name="member_id" value="<?= $member['id'] ?>" />
+                                                                                                        <button type="submit" name="remove_member" class="btn btn-sm btn-outline-danger" title="Remove">
+                                                                                                            <i class="bi bi-trash"></i>
+                                                                                                        </button>
+                                                                                                    </form>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        <?php 
+                                                                                            endforeach;
+                                                                                        else:
+                                                                                        ?>
+                                                                                            <tr>
+                                                                                                <td colspan="6" class="text-center">No members found.</td>
+                                                                                            </tr>
+                                                                                        <?php endif; ?>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        <?php endforeach; ?>
+                                                    <?php else: ?>
+                                                        <tr>
+                                                            <td colspan="5" class="text-center">No clubs found.</td>
+                                                        </tr>
+                                                    <?php endif; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="generateReportSection" class="section-container d-none" aria-label="Generate Report Section">
+                        <div class="row justify-content-center">
+                            <div class="col-12">
+                                <div class="card mt-4 mb-4">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h5 class="card-title mb-0">Generate Reports</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <?php if (isset($error)): ?>
+                                            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+                                        <?php endif; ?>
+                                        
+                                        <form id="reportForm" method="post" action="generate_report.php">
+                                            <div class="row mb-3">
+                                                <div class="col-md-4">
+                                                    <label for="reportType" class="form-label">Report Type*</label>
+                                                    <select class="form-select" id="reportType" name="reportType" required>
+                                                        <option value="">Select Report Type</option>
+                                                        <option value="events">Events Report</option>
+                                                        <option value="attendance">Attendance Report</option>
+                                                        <option value="clubs">Club Members Report</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="dateFrom" class="form-label">Date From*</label>
+                                                    <input type="date" class="form-control" id="dateFrom" name="dateFrom" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="dateTo" class="form-label">Date To*</label>
+                                                    <input type="date" class="form-control" id="dateTo" name="dateTo" required>
+                                                </div>
+                                            </div>
+
+                                            <!-- Events Report Options -->
+                                            <div id="eventsOptions" class="report-options d-none">
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <label for="eventStatus" class="form-label">Event Status</label>
+                                                        <select class="form-select" id="eventStatus" name="eventStatus">
+                                                            <option value="all">All Status</option>
+                                                            <option value="upcoming">Upcoming</option>
+                                                            <option value="ongoing">Ongoing</option>
+                                                            <option value="completed">Completed</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Attendance Report Options -->
+                                            <div id="attendanceOptions" class="report-options d-none">
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <label for="attendanceStatus" class="form-label">Attendance Status</label>
+                                                        <select class="form-select" id="attendanceStatus" name="attendanceStatus">
+                                                            <option value="all">All Status</option>
+                                                            <option value="present">Present</option>
+                                                            <option value="absent">Absent</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="eventFilter" class="form-label">Filter by Event</label>
+                                                        <select class="form-select" id="eventFilter" name="eventFilter">
+                                                            <option value="all">All Events</option>
+                                                            <?php
+                                                            foreach ($events as $event) {
+                                                                echo '<option value="' . $event['id'] . '">' . htmlspecialchars($event['eventname']) . '</option>';
+                                                            }
+                                                            ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Club Members Report Options -->
+                                            <div id="clubsOptions" class="report-options d-none">
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <label for="memberStatus" class="form-label">Member Status</label>
+                                                        <select class="form-select" id="memberStatus" name="memberStatus">
+                                                            <option value="all">All Status</option>
+                                                            <option value="active">Active</option>
+                                                            <option value="pending">Pending</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="interestFilter" class="form-label">Filter by Interest</label>
+                                                        <select class="form-select" id="interestFilter" name="interestFilter">
+                                                            <option value="all">All Interests</option>
+                                                            <option value="visual_arts">Visual Arts</option>
+                                                            <option value="performing_arts">Performing Arts</option>
+                                                            <option value="music">Music</option>
+                                                            <option value="dance">Dance</option>
+                                                            <option value="literature">Literature</option>
+                                                            <option value="cultural_events">Cultural Events</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="reportFormat" class="form-label">Report Format*</label>
+                                                    <select class="form-select" id="reportFormat" name="reportFormat" required>
+                                                        <option value="pdf">PDF</option>
+                                                        <option value="excel">Excel</option>
+                                                        <option value="csv">CSV</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="text-end">
+                                                <button type="submit" class="btn btn-primary" name="generate_report">
+                                                    <i class="bi bi-file-earmark-bar-graph me-2"></i>Generate Report
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                 </main>
             </div>
         </div>
@@ -903,50 +1363,15 @@ if (isset($_GET['edit_att_id'])) {
                 sidebarExpandBtn.addEventListener('click', toggleSidebar);
                 window.addEventListener('resize', checkWidth);
 
-                navLinks.forEach((link) => {
+                // Handle all navigation links
+                document.querySelectorAll('#sidebar .nav-link[data-section]').forEach((link) => {
                     link.addEventListener('click', function (e) {
                         e.preventDefault();
-                        showSection(this.getAttribute('data-section'));
+                        const sectionId = this.getAttribute('data-section');
+                        showSection(sectionId);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     });
                 });
-
-                // Buttons inside event dropdown submenu
-                document.querySelectorAll('#eventsSubMenu .nav-link').forEach((link) => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        showSection(link.getAttribute('data-section'));
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    });
-                });
-
-                // Special buttons for toggling between create/view events sections
-                const cancelCreateEventBtn = document.getElementById('cancelCreateEventBtn');
-                const recordNewAttendanceBtn = document.getElementById('recordNewAttendanceBtn');
-                const cancelAttendanceBtn = document.getElementById('cancelAttendanceBtn');
-
-                if (cancelCreateEventBtn) {
-                    cancelCreateEventBtn.addEventListener('click', function () {
-                        showSection('viewEventsSection');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    });
-                }
-                if (recordNewAttendanceBtn) {
-                    recordNewAttendanceBtn.addEventListener('click', function () {
-                        showSection('attendanceSection');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    });
-                }
-                if (cancelAttendanceBtn) {
-                    cancelAttendanceBtn.addEventListener('click', function () {
-                        showSection('attendanceSection');
-                        // If no edit, reset form
-                        if (!<?= $editAttendance ? 'true' : 'false' ?>) {
-                            document.getElementById('attendanceForm').reset();
-                        }
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    });
-                }
 
                 // On page load, show based on URL params or default to Attendance
                 function showInitialSection() {

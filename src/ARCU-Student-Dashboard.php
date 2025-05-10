@@ -31,6 +31,51 @@ try {
 $successMessage = '';
 $errors         = [];
 
+// Handle Join Club form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_club'])) {
+    $studentName = trim($_POST['studentName'] ?? '');
+    $studentId = trim($_POST['studentId'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $clubId = (int)($_POST['club_id'] ?? 0);
+    $interests = isset($_POST['interests']) ? implode(', ', (array)$_POST['interests']) : '';
+    $whyJoin = trim($_POST['whyJoin'] ?? '');
+
+    $errors = [];
+    if (empty($studentName)) $errors[] = 'Full Name is required.';
+    if (empty($studentId)) $errors[] = 'Student ID is required.';
+    if (empty($email)) $errors[] = 'Email Address is required.';
+    if ($clubId <= 0) $errors[] = 'Please select a club.';
+    if (empty($_POST['interests'])) $errors[] = 'At least one area of interest must be selected.';
+    if (empty($whyJoin)) $errors[] = 'Please explain why you want to join.';
+
+    if (empty($errors)) {
+        try {
+            $stmt = $pdo->prepare('INSERT INTO club_members (club_id, student_name, student_id, email, phone, interests, why_join, join_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), "pending")');
+            $stmt->execute([$clubId, $studentName, $studentId, $email, $phone, $interests, $whyJoin]);
+            $successMessage = 'Your application has been submitted successfully!';
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?msg=' . urlencode($successMessage) . '#clubsSection');
+            exit();
+        } catch (\PDOException $e) {
+            $errors[] = 'Error submitting application: ' . $e->getMessage();
+        }
+    }
+}
+
+// Fetch available clubs
+try {
+    $stmt = $pdo->query('SELECT * FROM clubs WHERE status = "active" ORDER BY club_name ASC');
+    $clubs = $stmt->fetchAll();
+} catch (\PDOException $e) {
+    error_log("Error fetching clubs: " . $e->getMessage());
+    $clubs = [];
+}
+
+// Check for success message from redirect
+if (isset($_GET['msg'])) {
+    $successMessage = htmlspecialchars($_GET['msg']);
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -311,6 +356,61 @@ $errors         = [];
                         </div>
                         <div class="error-message"></div>
                         <div id="clubsContainer" class="row"></div>
+
+                        <!-- Join Club Form -->
+                        <div class="card mt-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">Join ARCU Club</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="joinClubForm" method="post" novalidate>
+                                    <div class="mb-3">
+                                        <label for="club_id" class="form-label">Select Club*</label>
+                                        <select class="form-select" id="club_id" name="club_id" required>
+                                            <option value="">Choose a club...</option>
+                                            <?php foreach ($clubs as $club): ?>
+                                                <option value="<?= $club['club_id'] ?>"><?= htmlspecialchars($club['club_name']) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="studentName" class="form-label">Full Name*</label>
+                                        <input type="text" class="form-control" id="studentName" name="studentName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="studentId" class="form-label">Student ID*</label>
+                                        <input type="text" class="form-control" id="studentId" name="studentId" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email Address*</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="interests" class="form-label">Areas of Interest*</label>
+                                        <select class="form-select" id="interests" name="interests" multiple required>
+                                            <option value="visual_arts">Visual Arts</option>
+                                            <option value="performing_arts">Performing Arts</option>
+                                            <option value="music">Music</option>
+                                            <option value="dance">Dance</option>
+                                            <option value="literature">Literature</option>
+                                            <option value="cultural_events">Cultural Events</option>
+                                        </select>
+                                        <div class="form-text">Hold Ctrl/Cmd to select multiple options</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="whyJoin" class="form-label">Why do you want to join?*</label>
+                                        <textarea class="form-control" id="whyJoin" name="whyJoin" rows="3" required></textarea>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" name="join_club" class="btn btn-primary">Submit Application</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </main>

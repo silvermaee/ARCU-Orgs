@@ -1,0 +1,80 @@
+[2025-05-10 16:58:36] Report generation script started
+[2025-05-10 16:58:36] Database connection successful
+[2025-05-10 16:58:36] POST request received
+[2025-05-10 16:58:36] POST data: Array
+(
+    [reportType] => events
+    [dateFrom] => 2025-05-14
+    [dateTo] => 2025-07-08
+    [eventStatus] => all
+    [attendanceStatus] => all
+    [eventFilter] => all
+    [memberStatus] => all
+    [interestFilter] => all
+    [reportFormat] => csv
+    [generate_report] => 
+)
+
+[2025-05-10 16:58:36] Report Type: events
+[2025-05-10 16:58:36] Date From: 2025-05-14
+[2025-05-10 16:58:36] Date To: 2025-07-08
+[2025-05-10 16:58:36] Format: csv
+[2025-05-10 16:58:36] Processing events report
+[2025-05-10 16:58:36] Query: SELECT * FROM events WHERE startdate BETWEEN ? AND ? ORDER BY startdate DESC
+[2025-05-10 16:58:36] Data fetched: 2 records
+[2025-05-10 16:58:36] Generating CSV report
+[2025-05-10 16:58:36] CSV generation completed
+[2025-05-10 16:58:36] Report generation completed successfully
+[2025-05-10 16:59:00] Report generation script started
+[2025-05-10 16:59:00] Database connection successful
+[2025-05-10 16:59:00] POST request received
+[2025-05-10 16:59:00] POST data: Array
+(
+    [reportType] => events
+    [dateFrom] => 2025-05-14
+    [dateTo] => 2025-07-08
+    [eventStatus] => all
+    [attendanceStatus] => all
+    [eventFilter] => all
+    [memberStatus] => all
+    [interestFilter] => all
+    [reportFormat] => pdf
+    [generate_report] => 
+)
+
+[2025-05-10 16:59:00] Report Type: events
+[2025-05-10 16:59:00] Date From: 2025-05-14
+[2025-05-10 16:59:00] Date To: 2025-07-08
+[2025-05-10 16:59:00] Format: pdf
+[2025-05-10 16:59:00] Processing events report
+[2025-05-10 16:59:00] Query: SELECT * FROM events WHERE startdate BETWEEN ? AND ? ORDER BY startdate DESC
+[2025-05-10 16:59:00] Data fetched: 2 records
+[2025-05-10 16:59:00] Generating PDF report
+[2025-05-10 16:59:00] TCPDF not found. Please run: composer require tecnickcom/tcpdf
+[2025-05-10 16:59:12] Report generation script started
+[2025-05-10 16:59:12] Database connection successful
+[2025-05-10 16:59:12] POST request received
+[2025-05-10 16:59:12] POST data: Array
+(
+    [reportType] => events
+    [dateFrom] => 2025-05-14
+    [dateTo] => 2025-07-08
+    [eventStatus] => all
+    [attendanceStatus] => all
+    [eventFilter] => all
+    [memberStatus] => all
+    [interestFilter] => all
+    [reportFormat] => excel
+    [generate_report] => 
+)
+
+[2025-05-10 16:59:12] Report Type: events
+[2025-05-10 16:59:12] Date From: 2025-05-14
+[2025-05-10 16:59:12] Date To: 2025-07-08
+[2025-05-10 16:59:12] Format: excel
+[2025-05-10 16:59:12] Processing events report
+[2025-05-10 16:59:12] Query: SELECT * FROM events WHERE startdate BETWEEN ? AND ? ORDER BY startdate DESC
+[2025-05-10 16:59:12] Data fetched: 2 records
+[2025-05-10 16:59:12] Generating Excel report
+[2025-05-10 16:59:12] Excel generation completed
+[2025-05-10 16:59:12] Report generation completed successfully
